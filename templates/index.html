@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>周杰伦AI分身</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6', // 紫色调，符合周杰伦风格
+                        secondary: '#EC4899',
+                        dark: '#1F2937',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .chat-bubble-left {
+                border-radius: 1rem 1rem 1rem 0;
+            }
+            .chat-bubble-right {
+                border-radius: 1rem 1rem 0 1rem;
+            }
+            .scrollbar-hide {
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- 头部 -->
+        <header class="mb-6 text-center">
+            <div class="flex items-center justify-center mb-4">
+                <img src="/static/images/jay.jpg" alt="周杰伦" class="w-24 h-24 rounded-full object-cover border-4 border-primary shadow-lg">
+            </div>
+            <h1 class="text-[clamp(1.8rem,5vw,2.5rem)] font-bold text-dark">周杰伦聊天分身</h1>
+            <p class="text-gray-600 mt-2">与周董的AI分身实时对话</p>
+        </header>
+
+        <!-- 聊天区域 -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <!-- 聊天历史 -->
+            <div id="chat-history" class="h-[60vh] p-4 overflow-y-auto scrollbar-hide">
+                <div class="flex items-start mb-4">
+                    <img src="/static/images/jay.jpg" alt="周杰伦" class="w-10 h-10 rounded-full mr-3">
+                    <div class="bg-primary/10 text-dark p-3 max-w-[80%] chat-bubble-left">
+                        <p>哎哟，不错哦！我是周杰伦的AI分身，有什么想聊的尽管问我~</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="border-t p-4 bg-gray-50">
+                <form id="chat-form" class="flex gap-2">
+                    <input
+                        type="text"
+                        id="user-input"
+                        placeholder="输入你想聊的内容..."
+                        class="flex-1 px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                    <button
+                        type="submit"
+                        class="bg-primary hover:bg-primary/90 text-white p-3 rounded-full transition-all duration-300 transform hover:scale-105"
+                    >
+                        <i class="fa fa-paper-plane-o text-xl"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 状态信息 -->
+        <div class="mt-4 text-center text-gray-500 text-sm">
+            <p id="status">准备就绪</p>
+        </div>
+    </div>
+
+    <script>
+        // 聊天功能实现
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatForm = document.getElementById('chat-form');
+            const userInput = document.getElementById('user-input');
+            const chatHistory = document.getElementById('chat-history');
+            const statusElement = document.getElementById('status');
+
+            // 发送消息
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const message = userInput.value.trim();
+
+                if (message) {
+                    // 添加用户消息到聊天历史
+                    addMessageToHistory(message, 'user');
+
+                    // 清空输入框
+                    userInput.value = '';
+
+                    // 显示正在输入状态
+                    statusElement.textContent = '周杰伦正在思考...';
+
+                    try {
+                        // 发送消息到后端
+                        const response = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ message: message })
+                        });
+
+                        const data = await response.json();
+
+                        // 添加AI回复到聊天历史
+                        addMessageToHistory(data.response, 'ai');
+                    } catch (error) {
+                        console.error('聊天出错:', error);
+                        addMessageToHistory('抱歉，我暂时无法回复，请稍后再试。', 'ai');
+                    } finally {
+                        // 恢复状态
+                        statusElement.textContent = '准备就绪';
+                    }
+                }
+            });
+
+            // 添加消息到聊天历史
+            function addMessageToHistory(message, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `flex items-start mb-4 ${sender === 'user' ? 'justify-end' : ''}`;
+
+                let messageHTML = '';
+                if (sender === 'user') {
+                    messageHTML = `
+                        <div class="bg-secondary text-white p-3 max-w-[80%] chat-bubble-right">
+                            <p>${message}</p>
+                        </div>
+                    `;
+                } else {
+                    messageHTML = `
+                        <!-- 替换为周杰伦头像（小） -->
+                        <img src="/static/images/jay.jpg" alt="周杰伦" class="w-10 h-10 rounded-full mr-3">
+                        <div class="bg-primary/10 text-dark p-3 max-w-[80%] chat-bubble-left">
+                            <p>${message}</p>
+                        </div>
+                    `;
+                }
+
+                messageDiv.innerHTML = messageHTML;
+                chatHistory.appendChild(messageDiv);
+
+                // 滚动到底部
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
