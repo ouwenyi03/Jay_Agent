@@ -10,3 +10,6 @@ Jay_agent/
 │   └── index.html
 ├── env/                    # 环境配置
 ├── app.py                  # 主应用文件
+
+cd Jay_agent
+python app.py
